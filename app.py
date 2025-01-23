@@ -37,7 +37,7 @@ model = load_model_file()
 with open("std.pkl","rb") as f:
     scaler=pickle.load(f)
 
-st.title("Predicting CNC Machine job Status")
+st.title("CNC Machine Failure Prediction")
 
 Type_select=st.selectbox('Select Job Type',['Low','Medium','High'])
 Type_map={'Low':1,'High':0,'Medium':2}
