@@ -1,2 +1,3 @@
 Streamlit
 tensorflow
+sklearn
