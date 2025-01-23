@@ -56,7 +56,7 @@ if st.button('Predict'):
     c2=scaler.transform(c1)
     predicted_output = model.predict(c2)
     predicted_class = np.argmax(predicted_output, axis=1)
-    st.write("Job Status:", predicted_class)
+    st.write(predicted_class)
     status={1:"No Failure",0:"Heat Dissipation Failure",3:"Power Failure",2:"Overstrain Failure",5:"Tool Wear Failure",4:"Random Failures"}
-    a=status.get(predicted_class)
-    st.write(a)
+    a=status.get(predicted_class,"Unknown Failure")
+    st.write("Predicted Status:", a)
