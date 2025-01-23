@@ -4,7 +4,27 @@ import pickle
 import tensorflow as tf
 from tensorflow.keras.models import load_model
 from tensorflow.keras.layers import LeakyReLU
+import base64
+def set_background_image_local(image_path):
+    with open(image_path, "rb") as file:
+        data = file.read()
+    base64_image = base64.b64encode(data).decode("utf-8")
+    st.markdown(
+        f"""
+        <style>
+        .stApp {{
+            background-image: url("data:image/png;base64,{base64_image}");
+            background-size: cover;
+            background-position: fit;
+            background-repeat: repeat;
+            background-attachment: fixed;
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
 
+set_background_image_local(r"12.png")
 @st.cache_resource
 def load_model_file():
     # Handle custom layers (if applicable)
@@ -38,6 +58,4 @@ if st.button('Predict'):
     predicted_class = np.argmax(predicted_output, axis=1)
     st.write("Job Status:", predicted_class)
     status={1:"No Failure",0:"Heat Dissipation Failure",3:"Power Failure",2:"Overstrain Failure",5:"Tool Wear Failure",4:"Random Failures"}
-    st.write(status.get(predicted_class)
-
-
+    st.write(status.get(predicted_class))
