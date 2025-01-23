@@ -1,1 +1,137 @@
+df=pd.read_csv("/content/predictive_maintenance.csv")
+
+
+df.drop("UDI",axis=1,inplace=True)
+df.drop("Target",axis=1,inplace=True)
+
+df.set_index("Product ID",inplace=True)
+
+df.isnull().sum()
+
+df.duplicated().sum()
+
+from sklearn.preprocessing import OrdinalEncoder
+encoder=OrdinalEncoder()
+
+df['Type']=encoder.fit_transform(df[["Type"]])
+df['Failure Type']=encoder.fit_transform(df[["Failure Type"]])
+#correlation
+df.corr()
+
+#hypotheses
+continues=['Air temperature [K]','Process temperature [K]','Rotational speed [rpm]', 'Torque [Nm]', 'Tool wear [min]']
+categories=["Type","Failure Type"]
+
+
+from scipy import stats
+
+def two_sample(d1,d2):
+  t=0
+  f=0
+  for i in  range(31):
+    sample1=d1.sample(frac=0.03)
+    sample2=d2.sample(frac=0.03)
+    t_test,p_value=stats.ttest_ind(sample1,sample2)
+    if p_value < 0.055:
+      f=f+1
+    else:
+      t=t+1
+  if t>f:
+    return True
+  else:
+    return False
+
+#defining function for categories vs categories
+def chisqare_cat_vs_cat(d1,d2):
+  return True if stats.chi2_contingency(pd.crosstab(d1,d2))[1] < 0.055 else False
+
+def annova_test(d1,d2):
+  group=df[d2].unique()
+  data={}
+  for i in group:
+    data[i]=df[d1][df[d2]==i]
+  f_value,p_value=stats.f_oneway(*[i for i in data.values()])  #task for baby
+  if p_value < 0.055:
+    return False
+  else:
+    return True
+
+final={}
+for i in df.columns:
+  final[i]={}
+  for j in df.columns:
+    if (i in continues) and (j in continues):
+      result=two_sample(df[i],df[j])
+    elif  (i in continues) and (j in categories):
+      result=annova_test(i,j)
+    elif (i in categories) and (j in continues):
+      result=annova_test(j,i)
+    elif (i in categories) and (j in categories):
+      result=chisqare_cat_vs_cat(df[i],df[j])
+    if result:
+      final[i][j]=1
+    else:
+      final[i][j]=0
+
+df1=pd.DataFrame(final)
+df1
+
+#skew and kurtosis
+for i in continues:
+    print(i,df[i].skew(),df[i].kurtosis())
+#transform
+from scipy import stats
+method=[0,0.5,-0.5,1,-1,2,-2]
+for i in method:
+      print(i)
+      print("skewness",pd.DataFrame(stats.boxcox(df["Rotational speed [rpm]"],lmbda=i)).skew().values,"kurtosis",pd.DataFrame(stats.boxcox(df["Rotational speed [rpm]"],lmbda=i)).kurtosis().values)
+
+df['Rotational speed [rpm]']=stats.boxcox(df["Rotational speed [rpm]"],lmbda=-2)
+#model_building
+x=df.drop("Failure Type",axis=1)
+y=df["Failure Type"]
+
+from tensorflow.keras.utils import to_categorical
+ynew=to_categorical(y)
+
+from sklearn.model_selection import train_test_split
+x_train,x_test,y_train,y_test=train_test_split(x,ynew,test_size=0.2)
+
+from sklearn.preprocessing import StandardScaler
+scaler=StandardScaler()
+
+std=scaler.fit(x_train)
+
+x_train_scaler=scaler.transform(x_train)
+x_test_scaler=scaler.transform(x_test)
+
+x_train_scaler[1]
+
+
+from tensorflow.keras.layers import Dense,Dropout
+from tensorflow.keras.models import Sequential
+
+import tensorflow as tf
+model1=Sequential()
+model1.add(Dense(1024,input_dim=x_train_scaler.shape[1],activation=tf.keras.layers.LeakyReLU(alpha=0.2)))
+model1.add(Dropout(0.2))
+model1.add(Dense(512,activation=tf.keras.layers.LeakyReLU(alpha=0.2)))
+model1.add(Dropout(0.23))
+model1.add(Dense(256,activation=tf.keras.layers.LeakyReLU(alpha=0.2)))
+model1.add(Dropout(0.15))
+model1.add(Dense(64,activation=tf.keras.layers.LeakyReLU(alpha=0.2)))
+model1.add(Dense(32,activation=tf.keras.layers.LeakyReLU(alpha=0.2)))
+model1.add(Dense(6,activation="softmax"))
+model1.compile(loss="categorical_crossentropy",optimizer="adam",metrics=["accuracy",tf.keras.metrics.F1Score(),tf.keras.metrics.Recall(),tf.keras.metrics.Precision()])
+
+result=model1.fit(x_train_scaler,y_train,epochs=18,validation_split=0.15,batch_size=16)
+
+
+with open("std.pkl","wb") as f1:
+  pickle.dump(scaler,f1)
+
+from tensorflow.keras.models import save_model
+
+# Save the model in HDF5 format (.h5)
+model1.save("model.h5")
 
