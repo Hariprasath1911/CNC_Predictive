@@ -2,12 +2,17 @@ import streamlit as st
 import pandas as pd
 import pickle
 
-@st.cache_resource
-def load_model():
-    with open("model.pkl", "rb") as f:
-        return pickle.load(f)
+from tensorflow.keras.models import load_model
+from tensorflow.keras.layers import LeakyReLU
 
-model = load_model()
+@st.cache_resource
+def load_model_file():
+    # Handle custom layers (if applicable)
+    custom_objects = {"LeakyReLU": LeakyReLU}
+    return load_model("model.h5", custom_objects=custom_objects)
+
+# Load the model
+model = load_model_file()
 
 with open("std.pkl","rb") as f:
     scaler=pickle.load(f)
