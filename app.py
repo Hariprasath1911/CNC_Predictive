@@ -44,7 +44,7 @@ Type_map={'Low':1,'High':0,'Medium':2}
 Type=Type_map.get(Type_select)
 Air_Temperature = st.number_input('Enter Air Temperature', value=0.0, step=0.01, min_value=0.0)
 Process_temperature = st.number_input('Enter Process temperature',value=0.0, step=0.01,min_value=0.0)
-Rotational_speed_1= st.number_input('Enter Rotational speed',value=0.0, step=0.01,min_value=0.1)
+Rotational_speed_1= st.number_input('Enter Rotational speed',min_value=0.1)
 Rotational_speed=1/(Rotational_speed_1**2)
 Torque= st.number_input('Enter Torque',value=0.0, step=0.01,min_value=0.0)
 Tool_wear=st.number_input('Enter Tool wear',value=0.0, step=0.01,min_value=0.0)
