@@ -1,6 +1,4 @@
 Streamlit
-pandas
-pickle
 tensorflow
 load_model
 LeakyReLU
