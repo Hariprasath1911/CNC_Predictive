@@ -22,12 +22,12 @@ st.title("Predicting CNC Machine job Status")
 Type_select=st.selectbox('Select Job Type',['Low','Medium','High'])
 Type_map={'Low':1,'High':0,'Medium':2}
 Type=Type_map.get(Type_select)
-Air_Temperature = st.number_input('Enter Air Temperature', min_value=0)
-Process_temperature = st.number_input('Enter Process temperature',min_value=0)
-Rotational_speed_1= st.number_input('Enter Rotational speed',min_value=0.1)
+Air_Temperature = st.number_input('Enter Air Temperature', value=0.0, step=0.01, min_value=0.0)
+Process_temperature = st.number_input('Enter Process temperature',value=0.0, step=0.01,min_value=0.0)
+Rotational_speed_1= st.number_input('Enter Rotational speed',value=0.0, step=0.01,min_value=0.01)
 Rotational_speed=1/(Rotational_speed_1**2)
-Torque= st.number_input('Enter Torque',min_value=0)
-Tool_wear=st.number_input('Enter Tool wear',min_value=0)
+Torque= st.number_input('Enter Torque',value=0.0, step=0.01,min_value=0.0)
+Tool_wear=st.number_input('Enter Tool wear',value=0.0, step=0.01,min_value=0.0)
 
 if st.button('Predict'):
     import numpy as np
@@ -37,5 +37,7 @@ if st.button('Predict'):
     predicted_output = model.predict(c2)
     predicted_class = np.argmax(predicted_output, axis=1)
     st.write("Job Status:", predicted_class)
+    status={1:"No Failure",0:"Heat Dissipation Failure",3:"Power Failure",2:"Overstrain Failure",5:"Tool Wear Failure",4:"Random Failures"}
+    st.write(status.get(predicted_class)
 
 
