@@ -20,7 +20,7 @@ with open("std.pkl","rb") as f:
 st.title("Predicting CNC Machine job Status")
 
 Type_select=st.selectbox('Select Job Type',['Low','Medium','High'])
-Tpe_map={'Low':1,'High':0,'Medium':2}
+Type_map={'Low':1,'High':0,'Medium':2}
 Type=Type_map.get(Type_select)
 Air_Temperature = st.number_input('Enter Air Temperature', min_value=0)
 Process_temperature = st.number_input('Enter Process temperature',min_value=0)
