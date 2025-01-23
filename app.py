@@ -58,4 +58,5 @@ if st.button('Predict'):
     predicted_class = np.argmax(predicted_output, axis=1)
     st.write("Job Status:", predicted_class)
     status={1:"No Failure",0:"Heat Dissipation Failure",3:"Power Failure",2:"Overstrain Failure",5:"Tool Wear Failure",4:"Random Failures"}
-    st.write(status.get(predicted_class))
+    a=status.get(predicted_class)
+    st.write(a)
